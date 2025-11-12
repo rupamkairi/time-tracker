@@ -3,6 +3,11 @@
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
+  "packageManager": "npm@8.5.0",
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
   "scripts": {},
   "repository": {
     "type": "git",
@@ -14,5 +19,8 @@
   "bugs": {
     "url": "https://github.com/rupamkairi/monorepo/issues"
   },
-  "homepage": "https://github.com/rupamkairi/monorepo#readme"
+  "homepage": "https://github.com/rupamkairi/monorepo#readme",
+  "dependencies": {
+    "turbo": "^2.6.1"
+  }
 }
