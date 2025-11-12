@@ -1,8 +1,12 @@
 # Node modules
 node_modules/
 
+
 # Turborepo
 .turbo
 
 # Environment Variables
 .env
+
+# Build Output
+dist/
