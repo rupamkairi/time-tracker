@@ -14,8 +14,10 @@
     "apps/honoapp": {
       "name": "@time-tracker/honoapp",
       "dependencies": {
+        "@hono/trpc-server": "^0.4.0",
         "@time-tracker/database": "*",
         "@time-tracker/logger": "*",
+        "@time-tracker/trpc": "*",
         "hono": "^4.10.5",
       },
       "devDependencies": {
@@ -26,6 +28,10 @@
       "name": "viteapp",
       "version": "0.0.0",
       "dependencies": {
+        "@tanstack/react-query": "^5.90.9",
+        "@time-tracker/trpc": "*",
+        "@trpc/client": "^11.7.1",
+        "@trpc/react-query": "^11.7.1",
         "react": "^19.2.0",
         "react-dom": "^19.2.0",
       },
@@ -61,6 +67,20 @@
     "packages/logger": {
       "name": "@time-tracker/logger",
       "version": "1.0.0",
+      "devDependencies": {
+        "pkgroll": "^2.20.1",
+        "tsx": "^4.20.6",
+        "typescript": "^5.9.3",
+      },
+    },
+    "packages/trpc": {
+      "name": "@time-tracker/trpc",
+      "version": "1.0.0",
+      "dependencies": {
+        "@trpc/client": "^11.7.1",
+        "@trpc/server": "^11.7.1",
+        "zod": "^4.1.12",
+      },
       "devDependencies": {
         "pkgroll": "^2.20.1",
         "tsx": "^4.20.6",
@@ -183,6 +203,8 @@
 
     "@eslint/plugin-kit": ["@eslint/plugin-kit@0.4.1", "", { "dependencies": { "@eslint/core": "^0.17.0", "levn": "^0.4.1" } }, "sha512-43/qtrDUokr7LJqoF2c3+RInu/t4zfrpYdoSDfYyhg52rwLV6TnOvdG4fXm7IkSB3wErkcmJS9iEhjVtOSEjjA=="],
 
+    "@hono/trpc-server": ["@hono/trpc-server@0.4.0", "", { "peerDependencies": { "@trpc/server": "^10.10.0 || >11.0.0-rc", "hono": ">=4.*" } }, "sha512-LGlJfCmNIGMwcknZEIYdujVMs9OkNVazhpOhaz3kTWOXvNL660VOHpvvktosCiJrajyBY1RtIJKQ+IKaQvNuSg=="],
+
     "@humanfs/core": ["@humanfs/core@0.19.1", "", {}, "sha512-5DyQ4+1JEUzejeK1JGICcideyfUbGixgS9jNgex5nqkW+cY7WZhxBigmieN5Qnw9ZosSNVC9KQKyb+GUaGyKUA=="],
 
     "@humanfs/node": ["@humanfs/node@0.16.7", "", { "dependencies": { "@humanfs/core": "^0.19.1", "@humanwhocodes/retry": "^0.4.0" } }, "sha512-/zUx+yOsIrG4Y43Eh2peDeKCxlRt/gET6aHfaKpuq267qXdYDFViVHfMaLyygZOnl0kGWxFIgsBy8QFuTLUXEQ=="],
@@ -297,11 +319,23 @@
 
     "@rollup/rollup-win32-x64-msvc": ["@rollup/rollup-win32-x64-msvc@4.53.2", "", { "os": "win32", "cpu": "x64" }, "sha512-k+/Rkcyx//P6fetPoLMb8pBeqJBNGx81uuf7iljX9++yNBVRDQgD04L+SVXmXmh5ZP4/WOp4mWF0kmi06PW2tA=="],
 
+    "@tanstack/query-core": ["@tanstack/query-core@5.90.9", "", {}, "sha512-UFOCQzi6pRGeVTVlPNwNdnAvT35zugcIydqjvFUzG62dvz2iVjElmNp/hJkUoM5eqbUPfSU/GJIr/wbvD8bTUw=="],
+
+    "@tanstack/react-query": ["@tanstack/react-query@5.90.9", "", { "dependencies": { "@tanstack/query-core": "5.90.9" }, "peerDependencies": { "react": "^18 || ^19" } }, "sha512-Zke2AaXiaSfnG8jqPZR52m8SsclKT2d9//AgE/QIzyNvbpj/Q2ln+FsZjb1j69bJZUouBvX2tg9PHirkTm8arw=="],
+
     "@time-tracker/database": ["@time-tracker/database@workspace:packages/database"],
 
     "@time-tracker/honoapp": ["@time-tracker/honoapp@workspace:apps/honoapp"],
 
     "@time-tracker/logger": ["@time-tracker/logger@workspace:packages/logger"],
+
+    "@time-tracker/trpc": ["@time-tracker/trpc@workspace:packages/trpc"],
+
+    "@trpc/client": ["@trpc/client@11.7.1", "", { "peerDependencies": { "@trpc/server": "11.7.1", "typescript": ">=5.7.2" } }, "sha512-uOnAjElKI892/U6aQMcBHYs3x7mme3Cvv1F87ytBL56rBvs7+DyK7r43zgaXKf13+GtPEI6ex5xjVUfyDW8XcQ=="],
+
+    "@trpc/react-query": ["@trpc/react-query@11.7.1", "", { "peerDependencies": { "@tanstack/react-query": "^5.80.3", "@trpc/client": "11.7.1", "@trpc/server": "11.7.1", "react": ">=18.2.0", "react-dom": ">=18.2.0", "typescript": ">=5.7.2" } }, "sha512-dEHDjIqSTzO8nLlCbtiFBMBwhbSkK1QP7aYVo3nP3sYBna0b+iCtrPXdxVPCSopr9/aIqDTEh+dMRZa7yBgjfQ=="],
+
+    "@trpc/server": ["@trpc/server@11.7.1", "", { "peerDependencies": { "typescript": ">=5.7.2" } }, "sha512-N3U8LNLIP4g9C7LJ/sLkjuPHwqlvE3bnspzC4DEFVdvx2+usbn70P80E3wj5cjOTLhmhRiwJCSXhlB+MHfGeCw=="],
 
     "@types/babel__core": ["@types/babel__core@7.20.5", "", { "dependencies": { "@babel/parser": "^7.20.7", "@babel/types": "^7.20.7", "@types/babel__generator": "*", "@types/babel__template": "*", "@types/babel__traverse": "*" } }, "sha512-qoQprZvz5wQFJwMDqeseRXWv3rqMvhgpbXFfVyWhbx9X47POIA6i/+dXefEmZKoAgOaTdaIgNSMqMIU61yRyzA=="],
 
