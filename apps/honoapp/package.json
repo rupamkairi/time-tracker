@@ -1,11 +1,11 @@
 {
-  "name": "@monorepo/honoapp",
+  "name": "@time-tracker/honoapp",
   "scripts": {
     "dev": "bun run --hot src/index.ts",
     "start": "bun run src/index.ts"
   },
   "dependencies": {
-    "@monorepo/logger": "*",
+    "@time-tracker/logger": "*",
     "hono": "^4.10.5"
   },
   "devDependencies": {

@@ -1,5 +1,5 @@
 import { Hono } from "hono";
-import { log } from "@monorepo/logger";
+import { log } from "@time-tracker/logger";
 
 log("Hello World...");
 

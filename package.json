@@ -1,5 +1,5 @@
 {
-  "name": "monorepo",
+  "name": "time-tracker",
   "version": "1.0.0",
   "description": "",
   "packageManager": "bun@1.3.2",
@@ -12,15 +12,15 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/rupamkairi/monorepo.git"
+    "url": "git+https://github.com/rupamkairi/time-tracker.git"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/rupamkairi/monorepo/issues"
+    "url": "https://github.com/rupamkairi/time-tracker/issues"
   },
-  "homepage": "https://github.com/rupamkairi/monorepo#readme",
+  "homepage": "https://github.com/rupamkairi/time-tracker#readme",
   "dependencies": {
     "turbo": "^2.6.1"
   }
