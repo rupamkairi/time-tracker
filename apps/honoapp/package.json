@@ -5,6 +5,7 @@
     "start": "bun run src/index.ts"
   },
   "dependencies": {
+    "@time-tracker/database": "*",
     "@time-tracker/logger": "*",
     "hono": "^4.10.5"
   },

@@ -1,7 +1,9 @@
 import { Hono } from "hono";
 import { log } from "@time-tracker/logger";
+import { getDatabase } from "@time-tracker/database";
 
 log("Hello World...");
+log(getDatabase());
 
 const app = new Hono();
 
