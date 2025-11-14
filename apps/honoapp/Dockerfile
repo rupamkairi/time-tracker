@@ -28,7 +28,7 @@ WORKDIR /app
 COPY apps/honoapp ./apps/honoapp
 
 # Expose the port
-EXPOSE 3000
+EXPOSE 10000
 
 # Set working directory to honoapp
 WORKDIR /app/apps/honoapp

@@ -6,6 +6,6 @@ services:
       context: .
       dockerfile: apps/honoapp/Dockerfile
     ports:
-      - "3000:3000"
+      - "10000:10000"
     environment:
       - NODE_ENV=production
