@@ -1,0 +1,11 @@
+version: '3.8'
+
+services:
+  honoapp:
+    build:
+      context: .
+      dockerfile: apps/honoapp/Dockerfile
+    ports:
+      - "10000:10000"
+    environment:
+      - NODE_ENV=production
