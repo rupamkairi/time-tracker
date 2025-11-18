@@ -1,20 +1,31 @@
 import { trpcServer } from "@hono/trpc-server";
-import { getDatabase } from "@time-tracker/database";
+import { db } from "@time-tracker/database";
 import { log } from "@time-tracker/logger";
-import { appRouter } from "@time-tracker/trpc";
+import { appRouter, createContext } from "@time-tracker/trpc";
 import { Hono } from "hono";
 import { cors } from "hono/cors";
 
 log("Hello World...");
-// log(getDatabase());
 
 const app = new Hono();
 
 app.use(
   "/trpc/*",
   cors(),
+
   trpcServer({
     router: appRouter,
+    createContext: async () => {
+      return createContext();
+    },
+
+    onError({ error, path, input }) {
+      console.error("❌ tRPC ERROR");
+      console.error("Path:", path);
+      console.error("Message:", error.message);
+      console.error("Input:", input);
+      console.error("Stack:", error.stack);
+    },
   })
 );
 
