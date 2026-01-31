@@ -1,12 +1,22 @@
-import { createTRPCReact, httpBatchLink } from "@trpc/react-query";
+import { QueryClient } from "@tanstack/react-query";
 import type { AppRouter } from "@time-tracker/trpc";
+import { createTRPCClient, httpBatchLink } from "@trpc/client";
+import { createTRPCOptionsProxy } from "@trpc/tanstack-react-query";
+import superjson from "superjson";
+import { trpcURL } from "../config";
 
-export const trpc = createTRPCReact<AppRouter>();
+export const queryClient = new QueryClient();
 
-export const trpcClient = trpc.createClient({
+const trpcClient = createTRPCClient<AppRouter>({
   links: [
     httpBatchLink({
-      url: "http://localhost:10000/trpc", // Your Hono server URL
+      url: trpcURL,
+      transformer: superjson,
     }),
   ],
+});
+
+export const trpc = createTRPCOptionsProxy<AppRouter>({
+  client: trpcClient,
+  queryClient,
 });
