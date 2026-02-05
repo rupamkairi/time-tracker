@@ -4,6 +4,7 @@ import { projectRouter } from "./routers/project";
 import { taskRouter } from "./routers/task";
 import { taskLogRouter } from "./routers/taskLog";
 import { taskLogDetailRouter } from "./routers/taskLogDetail";
+import { calendarRouter } from "./routers/calendar";
 import { publicProcedure as procedure, router } from "./trpc";
 
 const helloInputSchema = z.preprocess(
@@ -34,6 +35,7 @@ export const appRouter = router({
   taskLog: taskLogRouter,
   taskLogDetail: taskLogDetailRouter,
   reference: referenceRouter,
+  calendar: calendarRouter,
 });
 
 export type AppRouter = typeof appRouter;

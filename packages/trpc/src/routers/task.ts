@@ -65,6 +65,19 @@ export const taskRouter = router({
       return updatedTask;
     }),
 
+  updateOrder: publicProcedure
+    .input(z.array(z.object({ id: z.number(), order: z.number() })))
+    .mutation(async ({ ctx, input }) => {
+      await ctx.db.transaction(async (tx) => {
+        for (const item of input) {
+            await tx.update(task)
+                .set({ order: item.order })
+                .where(eq(task.id, item.id));
+        }
+      });
+      return { success: true };
+    }),
+
   delete: publicProcedure
     .input(deleteTaskSchema)
     .mutation(async ({ ctx, input }) => {
