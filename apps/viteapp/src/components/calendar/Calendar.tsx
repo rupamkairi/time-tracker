@@ -11,6 +11,7 @@ export interface CalendarEvent {
   title: string;
   start: Date;
   end: Date;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   resource?: any;
 }
 

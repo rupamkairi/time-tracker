@@ -12,6 +12,7 @@ export default function Providers({ children }: { children: React.ReactNode }) {
       links: [
         httpBatchLink({
           url: trpcURL,
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
           transformer: superjson as any,
         }),
       ],

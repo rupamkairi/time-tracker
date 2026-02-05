@@ -30,7 +30,7 @@ export function ProjectSummary({ projectId }: { projectId: number }) {
       <div className="bg-white p-4 rounded-lg border border-gray-200 shadow-sm col-span-full">
          <div className="text-sm text-gray-500 font-medium mb-2">Status Breakdown</div>
          <div className="flex gap-4">
-            {stats.statusBreakdown.map((item: any) => (
+            {stats.statusBreakdown.map((item) => (
                 <div key={item.status} className="flex items-center gap-2">
                     <span className={clsx("w-2 h-2 rounded-full", {
                         "bg-gray-400": item.status === 'todo',

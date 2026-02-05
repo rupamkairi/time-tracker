@@ -3,6 +3,7 @@ import { AppLayout } from "./components/layout/AppLayout";
 import { ProjectList } from "./pages/projects/ProjectList";
 import { ProjectDetail } from "./pages/projects/ProjectDetail";
 import { CalendarView } from "./pages/calendar/CalendarView";
+import { LogDetail } from "./pages/logs/LogDetail";
 
 export default function App() {
   return (
@@ -13,6 +14,7 @@ export default function App() {
           <Route path="projects" element={<ProjectList />} />
           <Route path="projects/:projectId" element={<ProjectDetail />} />
           <Route path="calendar" element={<CalendarView />} />
+          <Route path="logs/:logId" element={<LogDetail />} />
         </Route>
       </Routes>
     </BrowserRouter>

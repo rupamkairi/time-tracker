@@ -1,11 +1,14 @@
 import { useParams, Link } from "react-router-dom";
+import { useState } from "react";
 import { trpc } from "../../utils/trpc";
 import { ProjectSummary } from "../../components/project/ProjectSummary";
 import { ProjectTasks } from "../../components/project/ProjectTasks";
+import { CreateTaskModal } from "../../components/task/CreateTaskModal";
 
 export function ProjectDetail() {
   const { projectId } = useParams();
   const id = Number(projectId);
+  const [isCreateTaskOpen, setIsCreateTaskOpen] = useState(false);
   
   const { data: project, isLoading } = trpc.project.getById.useQuery({ id }, {
     enabled: !!id
@@ -36,7 +39,10 @@ export function ProjectDetail() {
             <button className="px-4 py-2 bg-white border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50">
                 Edit Project
             </button>
-            <button className="px-4 py-2 bg-blue-600 text-white rounded-md text-sm font-medium hover:bg-blue-700 shadow-sm">
+            <button 
+                onClick={() => setIsCreateTaskOpen(true)}
+                className="px-4 py-2 bg-blue-600 text-white rounded-md text-sm font-medium hover:bg-blue-700 shadow-sm"
+            >
                 + New Task
             </button>
         </div>
@@ -54,6 +60,12 @@ export function ProjectDetail() {
         </div>
         <ProjectTasks projectId={id} />
       </div>
+
+      <CreateTaskModal 
+        isOpen={isCreateTaskOpen} 
+        onClose={() => setIsCreateTaskOpen(false)} 
+        projectId={id} 
+      />
     </div>
   );
 }

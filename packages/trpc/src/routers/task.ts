@@ -1,4 +1,4 @@
-import { eq } from "drizzle-orm";
+import { eq, and } from "drizzle-orm";
 import { z } from "zod";
 import { router, publicProcedure } from "../trpc";
 import { db, task } from "@time-tracker/database";
@@ -23,12 +23,26 @@ export const taskRouter = router({
   }),
 
   getByProjectId: publicProcedure
-    .input(z.object({ projectId: z.number() }))
+    .input(z.object({ 
+        projectId: z.number(),
+        status: z.enum(["todo", "in_progress", "done"]).optional(),
+        priority: z.enum(["low", "medium", "high"]).optional()
+    }))
     .query(async ({ ctx, input }) => {
+      const conditions = [eq(task.projectId, input.projectId)];
+      
+      if (input.status) {
+          conditions.push(eq(task.status, input.status));
+      }
+      
+      if (input.priority) {
+          conditions.push(eq(task.priority, input.priority));
+      }
+
       const tasks = await ctx.db
         .select()
         .from(task)
-        .where(eq(task.projectId, input.projectId));
+        .where(and(...conditions));
       return tasks;
     }),
 
