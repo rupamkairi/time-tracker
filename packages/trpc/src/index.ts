@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { referenceRouter } from "./routers/reference";
+import { projectRouter } from "./routers/project";
 import { taskRouter } from "./routers/task";
 import { taskLogRouter } from "./routers/taskLog";
 import { taskLogDetailRouter } from "./routers/taskLogDetail";
@@ -28,6 +29,7 @@ export const appRouter = router({
       const name = input?.trim() ?? "World";
       return `Hello ${name}!`;
     }),
+  project: projectRouter,
   task: taskRouter,
   taskLog: taskLogRouter,
   taskLogDetail: taskLogDetailRouter,

@@ -1,4 +1,5 @@
 import { eq } from "drizzle-orm";
+import { z } from "zod";
 import { router, publicProcedure } from "../trpc";
 import { db, task } from "@time-tracker/database";
 import {
@@ -20,6 +21,16 @@ export const taskRouter = router({
     const tasks = await ctx.db.select().from(task);
     return tasks;
   }),
+
+  getByProjectId: publicProcedure
+    .input(z.object({ projectId: z.number() }))
+    .query(async ({ ctx, input }) => {
+      const tasks = await ctx.db
+        .select()
+        .from(task)
+        .where(eq(task.projectId, input.projectId));
+      return tasks;
+    }),
 
   getById: publicProcedure
     .input(getTaskSchema)

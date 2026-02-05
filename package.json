@@ -23,7 +23,10 @@
   },
   "homepage": "https://github.com/rupamkairi/time-tracker#readme",
   "dependencies": {
-    "turbo": "^2.6.1"
+    "@types/uuid": "^11.0.0",
+    "dayjs": "^1.11.19",
+    "turbo": "^2.6.1",
+    "uuid": "^13.0.0"
   },
   "devDependencies": {
     "@types/node": "^24.10.1"
