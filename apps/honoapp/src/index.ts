@@ -5,6 +5,9 @@ import { appRouter, createContext } from "@time-tracker/trpc";
 import { Hono } from "hono";
 import { cors } from "hono/cors";
 
+console.log("Process Env Vars from app Start");
+console.log(process.env);
+console.log("Process Env Vars from app End");
 log("Hello World...");
 
 const app = new Hono();
@@ -26,7 +29,7 @@ app.use(
       console.error("Input:", input);
       console.error("Stack:", error.stack);
     },
-  })
+  }),
 );
 
 export default {
