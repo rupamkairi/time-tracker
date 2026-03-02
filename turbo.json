@@ -23,6 +23,11 @@
       "dependsOn": ["^build"],
       "persistent": true,
       "cache": true
+    },
+    "preview": {
+      "dependsOn": ["^build"],
+      "persistent": true,
+      "cache": true
     }
   }
 }
