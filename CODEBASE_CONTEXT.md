@@ -619,7 +619,7 @@ export const appRouter = router({
   task: taskRouter,
   taskLog: taskLogRouter,
   taskLogDetail: taskLogDetailRouter,
-  reference: referenceRouter,
+  links: linksRouter,
 });
 
 export type AppRouter = typeof appRouter;
@@ -737,15 +737,15 @@ export const getTaskLogDetailSchema = z.object({
   id: z.number(),
 });
 
-export const createReferenceSchema = z.object({
+export const createLinksSchema = z.object({
   taskLogDetailId: z.number(),
   url: z.string().url("Must be a valid URL"),
   title: z.string().optional(),
   linkType: z.string().optional(),
-  createdAt: z.string(),
+  createdAt: z.string().optional(),
 });
 
-export const updateReferenceSchema = z.object({
+export const updateLinksSchema = z.object({
   id: z.number(),
   taskLogDetailId: z.number().optional(),
   url: z.string().url().optional(),
@@ -753,11 +753,11 @@ export const updateReferenceSchema = z.object({
   linkType: z.string().optional(),
 });
 
-export const deleteReferenceSchema = z.object({
+export const deleteLinksSchema = z.object({
   id: z.number(),
 });
 
-export const getReferenceSchema = z.object({
+export const getLinksSchema = z.object({
   id: z.number(),
 });
 ```
@@ -1007,89 +1007,86 @@ export const taskLogDetailRouter = router({
 });
 ```
 
-### packages/trpc/src/routers/reference.ts
+### packages/trpc/src/routers/links.ts
 
 ```typescript
 import { eq } from "drizzle-orm";
 import { router, publicProcedure } from "../trpc";
-import { reference } from "@time-tracker/database";
+import { links } from "@time-tracker/database";
 import {
-  createReferenceSchema,
-  updateReferenceSchema,
-  deleteReferenceSchema,
-  getReferenceSchema,
+  createLinksSchema,
+  updateLinksSchema,
+  deleteLinksSchema,
+  getLinksSchema,
 } from "../schema";
 
-export const referenceRouter = router({
+export const linksRouter = router({
   create: publicProcedure
-    .input(createReferenceSchema)
+    .input(createLinksSchema)
     .mutation(async ({ ctx, input }) => {
-      const [newReference] = await ctx.db
-        .insert(reference)
-        .values(input)
-        .returning();
-      return newReference;
+      const [newLink] = await ctx.db.insert(links).values(input).returning();
+      return newLink;
     }),
 
   getAll: publicProcedure.query(async ({ ctx }) => {
-    const references = await ctx.db.select().from(reference);
-    return references;
+    const allLinks = await ctx.db.select().from(links);
+    return allLinks;
   }),
 
   getById: publicProcedure
-    .input(getReferenceSchema)
+    .input(getLinksSchema)
     .query(async ({ ctx, input }) => {
-      const [foundReference] = await ctx.db
+      const [foundLink] = await ctx.db
         .select()
-        .from(reference)
-        .where(eq(reference.id, input.id));
+        .from(links)
+        .where(eq(links.id, input.id));
 
-      if (!foundReference) {
-        throw new Error("Reference not found");
+      if (!foundLink) {
+        throw new Error("Link not found");
       }
 
-      return foundReference;
+      return foundLink;
     }),
 
   getByTaskLogDetailId: publicProcedure
-    .input(getReferenceSchema)
+    .input(getLinksSchema)
     .query(async ({ ctx, input }) => {
-      const references = await ctx.db
+      const allLinks = await ctx.db
         .select()
-        .from(reference)
-        .where(eq(reference.taskLogDetailId, input.id));
+        .from(links)
+        .where(eq(links.taskLogDetailId, input.id));
 
-      return references;
+      return allLinks;
     }),
 
   update: publicProcedure
-    .input(updateReferenceSchema)
+    .input(updateLinksSchema)
     .mutation(async ({ ctx, input }) => {
       const { id, ...updateData } = input;
 
-      const [updatedReference] = await ctx.db
-        .update(reference)
+      const [updatedLink] = await ctx.db
+        .update(links)
         .set(updateData)
-        .where(eq(reference.id, id))
+        .where(eq(links.id, id))
         .returning();
 
-      if (!updatedReference) {
-        throw new Error("Reference not found");
+      if (!updatedLink) {
+        throw new Error("Link not found");
       }
 
-      return updatedReference;
+      return updatedLink;
     }),
 
   delete: publicProcedure
-    .input(deleteReferenceSchema)
+    .input(deleteLinksSchema)
     .mutation(async ({ ctx, input }) => {
-      const [deletedReference] = await ctx.db
-        .delete(reference)
-        .where(eq(reference.id, input.id))
+      const [deletedLink] = await ctx.db
+        .delete(links)
+        .where(eq(links.id, input.id))
         .returning();
 
-      if (!deletedReference) {
-        throw new Error("Reference not found");
+      if (!deletedLink) {
+        throw new Error("Link not found");
       }
 
       return { success: true, id: input.id };

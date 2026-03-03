@@ -34,11 +34,15 @@ export function EditLogModal({ isOpen, onClose, logId }: EditLogModalProps) {
     updateLog.mutate({
       id: logId,
       ...data,
-      taskId: data.taskId ? Number(data.taskId) : undefined
+      taskId: data.taskId ? Number(data.taskId) : undefined,
+      links: data.links
     });
   };
 
   if (isLoadingLog) return null;
+
+  // Flatten links from details for the form
+  const flattenedLinks = log?.details?.flatMap(d => d.links || []) || [];
 
   return (
     <Modal isOpen={isOpen} onClose={onClose} title="Edit Log">
@@ -50,7 +54,8 @@ export function EditLogModal({ isOpen, onClose, logId }: EditLogModalProps) {
                 taskId: log.taskId || undefined,
                 startTime: log.startTime || undefined,
                 endTime: log.endTime || undefined,
-                logDate: log.logDate || undefined
+                logDate: log.logDate || undefined,
+                links: flattenedLinks
             }}
             onSubmit={handleSubmit} 
             onCancel={onClose}

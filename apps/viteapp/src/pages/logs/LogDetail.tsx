@@ -64,17 +64,17 @@ export function LogDetail() {
                           <Markdown remarkPlugins={[remarkGfm]}>{detail.content || ''}</Markdown>
                       </div>
                       
-                      {detail.references && detail.references.length > 0 && (
+                      {detail.links && detail.links.length > 0 && (
                           <div className="mt-4 pt-4 border-t border-gray-100">
-                              <h4 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">References</h4>
+                              <h4 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Links</h4>
                               <ul className="space-y-1">
-                                  {detail.references.map((ref) => (
-                                      <li key={ref.id}>
-                                          <a href={ref.url} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline text-sm flex items-center gap-1">
+                                  {detail.links.map((link) => (
+                                      <li key={link.id}>
+                                          <a href={link.url} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline text-sm flex items-center gap-1">
                                               <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
                                               </svg>
-                                              {ref.title || ref.url}
+                                              {link.title || link.url}
                                           </a>
                                       </li>
                                   ))}

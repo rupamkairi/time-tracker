@@ -57,9 +57,7 @@ export const getTaskSchema = z.object({
 
 // Task Log Schemas
 export const createTaskLogSchema = z.object({
-  taskId: z.number().optional(), // Nullable in schema? No, I added taskId to taskLog. Check schema.ts.
-  // schema.ts: taskId: integer("task_id").references(...)
-  // It is NOT .notNull(). So nullable.
+  taskId: z.number().optional(),
   title: z.string().min(1, "Title is required"),
   description: z.string().optional(),
   startTime: z.string().optional(),
@@ -68,6 +66,15 @@ export const createTaskLogSchema = z.object({
   timezone: z.string().optional(),
   createdAt: z.string().optional(),
   updatedAt: z.string().optional(),
+  links: z
+    .array(
+      z.object({
+        url: z.string().url("Must be a valid URL"),
+        title: z.string().optional(),
+        linkType: z.string().optional(),
+      }),
+    )
+    .optional(),
 });
 
 export const updateTaskLogSchema = z.object({
@@ -80,6 +87,16 @@ export const updateTaskLogSchema = z.object({
   logDate: z.string().optional(),
   timezone: z.string().optional(),
   updatedAt: z.string().optional(),
+  links: z
+    .array(
+      z.object({
+        id: z.number().optional(),
+        url: z.string().url("Must be a valid URL"),
+        title: z.string().optional(),
+        linkType: z.string().optional(),
+      }),
+    )
+    .optional(),
 });
 
 export const deleteTaskLogSchema = z.object({
@@ -109,7 +126,7 @@ export const getTaskLogDetailSchema = z.object({
   id: z.number(),
 });
 
-export const createReferenceSchema = z.object({
+export const createLinksSchema = z.object({
   taskLogDetailId: z.number(),
   url: z.string().url("Must be a valid URL"),
   title: z.string().optional(),
@@ -117,7 +134,7 @@ export const createReferenceSchema = z.object({
   createdAt: z.string().optional(),
 });
 
-export const updateReferenceSchema = z.object({
+export const updateLinksSchema = z.object({
   id: z.number(),
   taskLogDetailId: z.number().optional(),
   url: z.string().url().optional(),
@@ -125,10 +142,10 @@ export const updateReferenceSchema = z.object({
   linkType: z.string().optional(),
 });
 
-export const deleteReferenceSchema = z.object({
+export const deleteLinksSchema = z.object({
   id: z.number(),
 });
 
-export const getReferenceSchema = z.object({
+export const getLinksSchema = z.object({
   id: z.number(),
 });

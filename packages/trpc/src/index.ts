@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { referenceRouter } from "./routers/reference";
+import { linksRouter } from "./routers/links";
 import { projectRouter } from "./routers/project";
 import { taskRouter } from "./routers/task";
 import { taskLogRouter } from "./routers/taskLog";
@@ -34,7 +34,7 @@ export const appRouter = router({
   task: taskRouter,
   taskLog: taskLogRouter,
   taskLogDetail: taskLogDetailRouter,
-  reference: referenceRouter,
+  links: linksRouter,
   calendar: calendarRouter,
 });
 

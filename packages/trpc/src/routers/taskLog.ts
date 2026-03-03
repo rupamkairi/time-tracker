@@ -1,6 +1,12 @@
 import { eq } from "drizzle-orm";
 import { router, publicProcedure } from "../trpc";
-import { db, taskLog, task, taskLogDetail, reference } from "@time-tracker/database";
+import {
+  db,
+  taskLog,
+  task,
+  taskLogDetail,
+  links,
+} from "@time-tracker/database";
 import {
   createTaskLogSchema,
   updateTaskLogSchema,
@@ -16,21 +22,42 @@ export const taskLogRouter = router({
       let logDate = input.logDate;
       if (!logDate && input.startTime) {
         try {
-            logDate = new Date(input.startTime).toISOString().split('T')[0];
+          logDate = new Date(input.startTime).toISOString().split("T")[0];
         } catch (e) {
-            // If date parsing fails, ignore
+          // If date parsing fails, ignore
         }
       }
 
+      const { links: inputLinks, ...taskLogValues } = input;
+
       const values = {
-          ...input,
-          logDate: logDate || input.logDate,
+        ...taskLogValues,
+        logDate: logDate || input.logDate,
       };
 
       const [newTaskLog] = await ctx.db
         .insert(taskLog)
         .values(values)
         .returning();
+
+      // If links are provided, create a default taskLogDetail and associated links
+      if (inputLinks && inputLinks.length > 0) {
+        const [newDetail] = await ctx.db
+          .insert(taskLogDetail)
+          .values({
+            taskLogId: newTaskLog.id,
+            content: "Links added during log creation",
+          })
+          .returning();
+
+        const linksToInsert = inputLinks.map((link) => ({
+          ...link,
+          taskLogDetailId: newDetail.id,
+        }));
+
+        await ctx.db.insert(links).values(linksToInsert);
+      }
+
       return newTaskLog;
     }),
 
@@ -50,59 +77,55 @@ export const taskLogRouter = router({
       if (!foundTaskLog) {
         throw new Error("Task log not found");
       }
-      
+
       // Fetch details
       const details = await ctx.db
         .select()
         .from(taskLogDetail)
         .where(eq(taskLogDetail.taskLogId, input.id));
-        
-      // Fetch references for each detail
-      const detailsWithRefs = await Promise.all(details.map(async (detail) => {
-          const refs = await ctx.db
+
+      // Fetch links for each detail
+      const detailsWithLinks = await Promise.all(
+        details.map(async (detail) => {
+          const lks = await ctx.db
             .select()
-            .from(reference)
-            .where(eq(reference.taskLogDetailId, detail.id));
-          return { ...detail, references: refs };
-      }));
-      
+            .from(links)
+            .where(eq(links.taskLogDetailId, detail.id));
+          return { ...detail, links: lks };
+        }),
+      );
+
       // Fetch task info if possible (taskId might be null if schema allows, but here it's likely present)
       let taskInfo = null;
       if (foundTaskLog.taskId) {
         const [t] = await ctx.db
-            .select()
-            .from(task)
-            .where(eq(task.id, foundTaskLog.taskId));
+          .select()
+          .from(task)
+          .where(eq(task.id, foundTaskLog.taskId));
         taskInfo = t;
       }
 
       return {
-          ...foundTaskLog,
-          task: taskInfo,
-          details: detailsWithRefs
+        ...foundTaskLog,
+        task: taskInfo,
+        details: detailsWithLinks,
       };
     }),
 
   update: publicProcedure
     .input(updateTaskLogSchema)
     .mutation(async ({ ctx, input }) => {
-      const { id, ...updateData } = input;
-      
+      const { id, links: inputLinks, ...updateData } = input;
+
       // Also update logDate if startTime changes and logDate is not provided in update
-      // But updateData might have partial fields.
-      // If startTime is updated, should we update logDate?
-      // Probably yes, if logDate isn't explicitly updated.
-      // But we need the existing logDate or strict logic.
-      // Let's simpler logic: if logDate is provided, use it.
-      // If startTime is provided and logDate is NOT, maybe update it?
-      // "Implement log date handling" - ensure logDate is properly set.
-      
       let finalUpdateData = { ...updateData };
-      
+
       if (updateData.startTime && !updateData.logDate) {
-         try {
-            finalUpdateData.logDate = new Date(updateData.startTime).toISOString().split('T')[0];
-         } catch (e) {}
+        try {
+          finalUpdateData.logDate = new Date(updateData.startTime)
+            .toISOString()
+            .split("T")[0];
+        } catch (e) {}
       }
 
       const [updatedTaskLog] = await ctx.db
@@ -113,6 +136,43 @@ export const taskLogRouter = router({
 
       if (!updatedTaskLog) {
         throw new Error("Task log not found");
+      }
+
+      // Handle links update (Replace All strategy for simplicity in modal)
+      if (inputLinks !== undefined) {
+        // Find or create a detail to attach links to
+        let [existingDetail] = await ctx.db
+          .select()
+          .from(taskLogDetail)
+          .where(eq(taskLogDetail.taskLogId, id))
+          .limit(1);
+
+        if (!existingDetail) {
+          [existingDetail] = await ctx.db
+            .insert(taskLogDetail)
+            .values({
+              taskLogId: id,
+              content: "Links updated",
+            })
+            .returning();
+        }
+
+        // Delete existing links for this detail
+        await ctx.db
+          .delete(links)
+          .where(eq(links.taskLogDetailId, existingDetail.id));
+
+        // Insert new links
+        if (inputLinks.length > 0) {
+          const linksToInsert = inputLinks.map((link) => ({
+            url: link.url,
+            title: link.title,
+            linkType: link.linkType,
+            taskLogDetailId: existingDetail.id,
+          }));
+
+          await ctx.db.insert(links).values(linksToInsert);
+        }
       }
 
       return updatedTaskLog;
