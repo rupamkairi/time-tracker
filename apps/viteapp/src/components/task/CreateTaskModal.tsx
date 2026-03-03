@@ -1,8 +1,8 @@
 import { trpc } from "../../utils/trpc";
-import { Modal } from "../ui/Modal";
 import { TaskForm } from "./TaskForm";
 import type { TaskFormData } from "./TaskForm";
 import { toast } from "sonner";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 
 interface CreateTaskModalProps {
   isOpen: boolean;
@@ -33,12 +33,21 @@ export function CreateTaskModal({ isOpen, onClose, projectId }: CreateTaskModalP
   };
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} title="Create New Task">
-      <TaskForm 
-        onSubmit={handleSubmit} 
-        onCancel={onClose}
-        isLoading={createTask.isPending}
-      />
-    </Modal>
+    <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
+      <DialogContent className="sm:max-w-[425px]">
+        <DialogHeader>
+          <DialogTitle>Create New Task</DialogTitle>
+          <DialogDescription>
+            Add a new task to your project to start tracking time.
+          </DialogDescription>
+        </DialogHeader>
+        <TaskForm 
+          onSubmit={handleSubmit} 
+          onCancel={onClose}
+          isLoading={createTask.isPending}
+        />
+      </DialogContent>
+    </Dialog>
   );
 }
+

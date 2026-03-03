@@ -1,8 +1,8 @@
 import { trpc } from "../../utils/trpc";
-import { Modal } from "../ui/Modal";
 import { LogForm } from "./LogForm";
 import type { LogFormData } from "./LogForm";
 import { toast } from "sonner";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 
 interface CreateLogModalProps {
   isOpen: boolean;
@@ -26,9 +26,6 @@ export function CreateLogModal({ isOpen, onClose, defaultDate }: CreateLogModalP
   });
 
   const handleSubmit = (data: LogFormData) => {
-      // Ensure empty strings are treated as undefined/null for optional fields if needed
-      // but react-hook-form handles standard inputs.
-      // taskId should be number or undefined.
       const payload = {
           ...data,
           taskId: data.taskId ? Number(data.taskId) : undefined
@@ -38,16 +35,25 @@ export function CreateLogModal({ isOpen, onClose, defaultDate }: CreateLogModalP
   };
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} title="Log Time">
-      <LogForm 
-        onSubmit={handleSubmit} 
-        onCancel={onClose}
-        isLoading={createLog.isPending}
-        defaultValues={{
-            logDate: defaultDate ? defaultDate.toISOString().split('T')[0] : undefined,
-            startTime: defaultDate ? defaultDate.toISOString().slice(0, 16) : undefined
-        }}
-      />
-    </Modal>
+    <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
+      <DialogContent className="sm:max-w-[500px] max-h-[90vh] overflow-y-auto">
+        <DialogHeader>
+          <DialogTitle>Log Time</DialogTitle>
+          <DialogDescription>
+            Record your time spent on tasks or projects.
+          </DialogDescription>
+        </DialogHeader>
+        <LogForm 
+          onSubmit={handleSubmit} 
+          onCancel={onClose}
+          isLoading={createLog.isPending}
+          defaultValues={{
+              logDate: defaultDate ? defaultDate.toISOString().split('T')[0] : undefined,
+              startTime: defaultDate ? defaultDate.toISOString().slice(0, 16) : undefined
+          }}
+        />
+      </DialogContent>
+    </Dialog>
   );
 }
+

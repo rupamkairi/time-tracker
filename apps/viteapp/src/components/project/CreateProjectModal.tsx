@@ -1,8 +1,8 @@
 import { trpc } from "../../utils/trpc";
-import { Modal } from "../ui/Modal";
 import { ProjectForm } from "./ProjectForm";
 import type { ProjectFormData } from "./ProjectForm";
 import { toast } from "sonner";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 
 interface CreateProjectModalProps {
   isOpen: boolean;
@@ -28,12 +28,21 @@ export function CreateProjectModal({ isOpen, onClose }: CreateProjectModalProps)
   };
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} title="Create New Project">
-      <ProjectForm 
-        onSubmit={handleSubmit} 
-        onCancel={onClose}
-        isLoading={createProject.isPending}
-      />
-    </Modal>
+    <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
+      <DialogContent className="sm:max-w-[425px]">
+        <DialogHeader>
+          <DialogTitle>Create New Project</DialogTitle>
+          <DialogDescription>
+            Add a new project to start tracking your time.
+          </DialogDescription>
+        </DialogHeader>
+        <ProjectForm 
+          onSubmit={handleSubmit} 
+          onCancel={onClose}
+          isLoading={createProject.isPending}
+        />
+      </DialogContent>
+    </Dialog>
   );
 }
+

@@ -1,8 +1,8 @@
 import { trpc } from "../../utils/trpc";
-import { Modal } from "../ui/Modal";
 import { TaskForm } from "./TaskForm";
 import type { TaskFormData } from "./TaskForm";
 import { toast } from "sonner";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 
 interface EditTaskModalProps {
   isOpen: boolean;
@@ -38,11 +38,18 @@ export function EditTaskModal({ isOpen, onClose, taskId }: EditTaskModalProps) {
     });
   };
 
-  if (isLoadingTask) return null; // Or loading spinner inside modal
-
   return (
-    <Modal isOpen={isOpen} onClose={onClose} title="Edit Task">
-      {task ? (
+    <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
+      <DialogContent className="sm:max-w-[425px]">
+        <DialogHeader>
+          <DialogTitle>Edit Task</DialogTitle>
+          <DialogDescription>
+            Modify your task details.
+          </DialogDescription>
+        </DialogHeader>
+        {isLoadingTask ? (
+          <div className="py-10 text-center">Loading task...</div>
+        ) : task ? (
           <TaskForm 
             defaultValues={{
                 title: task.title,
@@ -55,9 +62,11 @@ export function EditTaskModal({ isOpen, onClose, taskId }: EditTaskModalProps) {
             onCancel={onClose}
             isLoading={updateTask.isPending}
           />
-      ) : (
-          <div>Task not found</div>
-      )}
-    </Modal>
+        ) : (
+          <div className="py-10 text-center text-destructive font-medium">Task not found</div>
+        )}
+      </DialogContent>
+    </Dialog>
   );
 }
+

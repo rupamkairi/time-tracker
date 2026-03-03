@@ -1,41 +1,95 @@
 import { useState } from "react";
 import { trpc } from "../../utils/trpc";
-import clsx from "clsx";
+import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import { EditTaskModal } from "../task/EditTaskModal";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Badge } from "@/components/ui/badge";
+import {
+  CheckCircle2,
+  Circle,
+  Clock,
+  MoreVertical,
+  Pencil,
+} from "lucide-react";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 type TaskStatus = "todo" | "in_progress" | "done";
 type TaskPriority = "low" | "medium" | "high";
 
+const priorityConfig: Record<TaskPriority, { label: string; color: string }> = {
+  low: { label: "Low", color: "bg-slate-100 text-slate-700 border-slate-200" },
+  medium: {
+    label: "Medium",
+    color: "bg-amber-100 text-amber-700 border-amber-200",
+  },
+  high: { label: "High", color: "bg-rose-100 text-rose-700 border-rose-200" },
+};
+
 export function ProjectTasks({ projectId }: { projectId: number }) {
-  const [statusFilter, setStatusFilter] = useState<TaskStatus | "">("");
-  const [priorityFilter, setPriorityFilter] = useState<TaskPriority | "">("");
+  const [statusFilter, setStatusFilter] = useState<TaskStatus | "all">("all");
+  const [priorityFilter, setPriorityFilter] = useState<TaskPriority | "all">(
+    "all",
+  );
   const [editingTaskId, setEditingTaskId] = useState<number | null>(null);
 
   const utils = trpc.useUtils();
 
   const { data: tasks, isLoading } = trpc.task.getByProjectId.useQuery({
     projectId,
-    status: statusFilter || undefined,
-    priority: priorityFilter || undefined,
+    status: statusFilter === "all" ? undefined : statusFilter,
+    priority: priorityFilter === "all" ? undefined : priorityFilter,
   });
 
   const updateTask = trpc.task.update.useMutation({
     onMutate: async (newTodo) => {
       await utils.task.getByProjectId.cancel();
-      const previousTasks = utils.task.getByProjectId.getData({ projectId });
-
-      utils.task.getByProjectId.setData({ projectId }, (old) => {
-        if (!old) return [];
-        return old.map((t) => (t.id === newTodo.id ? { ...t, ...newTodo } : t));
+      const previousTasks = utils.task.getByProjectId.getData({
+        projectId,
+        status: statusFilter === "all" ? undefined : statusFilter,
+        priority: priorityFilter === "all" ? undefined : priorityFilter,
       });
+
+      utils.task.getByProjectId.setData(
+        {
+          projectId,
+          status: statusFilter === "all" ? undefined : statusFilter,
+          priority: priorityFilter === "all" ? undefined : priorityFilter,
+        },
+        (old) => {
+          if (!old) return [];
+          return old.map((t) =>
+            t.id === newTodo.id ? { ...t, ...newTodo } : t,
+          );
+        },
+      );
 
       return { previousTasks };
     },
     onError: (_err, _newTodo, context) => {
       toast.error("Failed to update task");
       if (context?.previousTasks) {
-        utils.task.getByProjectId.setData({ projectId }, context.previousTasks);
+        utils.task.getByProjectId.setData(
+          {
+            projectId,
+            status: statusFilter === "all" ? undefined : statusFilter,
+            priority: priorityFilter === "all" ? undefined : priorityFilter,
+          },
+          context.previousTasks,
+        );
       }
     },
     onSettled: () => {
@@ -49,159 +103,159 @@ export function ProjectTasks({ projectId }: { projectId: number }) {
   };
 
   if (isLoading)
-    return <div className="text-center py-8">Loading tasks...</div>;
+    return (
+      <div className="space-y-3">
+        {[...Array(3)].map((_, i) => (
+          <Card key={i} className="animate-pulse h-16" />
+        ))}
+      </div>
+    );
 
   return (
     <div className="space-y-4">
       {/* Filters */}
-      <div className="flex gap-4 mb-4">
-        <select
+      <div className="flex gap-4">
+        <Select
           value={statusFilter}
-          onChange={(e) => setStatusFilter(e.target.value as TaskStatus | "")}
-          className="px-3 py-1.5 border border-gray-300 rounded-md text-sm focus:ring-blue-500 focus:border-blue-500"
+          onValueChange={(v) => setStatusFilter(v as TaskStatus | "all")}
         >
-          <option value="">All Statuses</option>
-          <option value="todo">To Do</option>
-          <option value="in_progress">In Progress</option>
-          <option value="done">Done</option>
-        </select>
+          <SelectTrigger className="w-[180px]">
+            <SelectValue placeholder="All Statuses" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">All Statuses</SelectItem>
+            <SelectItem value="todo">To Do</SelectItem>
+            <SelectItem value="in_progress">In Progress</SelectItem>
+            <SelectItem value="done">Done</SelectItem>
+          </SelectContent>
+        </Select>
 
-        <select
+        <Select
           value={priorityFilter}
-          onChange={(e) =>
-            setPriorityFilter(e.target.value as TaskPriority | "")
-          }
-          className="px-3 py-1.5 border border-gray-300 rounded-md text-sm focus:ring-blue-500 focus:border-blue-500"
+          onValueChange={(v) => setPriorityFilter(v as TaskPriority | "all")}
         >
-          <option value="">All Priorities</option>
-          <option value="low">Low</option>
-          <option value="medium">Medium</option>
-          <option value="high">High</option>
-        </select>
+          <SelectTrigger className="w-[180px]">
+            <SelectValue placeholder="All Priorities" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">All Priorities</SelectItem>
+            <SelectItem value="low">Low</SelectItem>
+            <SelectItem value="medium">Medium</SelectItem>
+            <SelectItem value="high">High</SelectItem>
+          </SelectContent>
+        </Select>
       </div>
 
       <div className="space-y-3">
         {tasks?.map((task) => (
-          <div
+          <Card
             key={task.id}
-            className="p-4 bg-white border border-gray-200 rounded-lg shadow-sm flex items-center justify-between hover:border-blue-300 transition-colors group"
+            className="group hover:border-primary transition-colors overflow-hidden"
           >
-            <div className="flex items-center gap-3">
-              <button
-                onClick={() => {
-                  const nextStatus: Record<string, TaskStatus> = {
-                    todo: "in_progress",
-                    in_progress: "done",
-                    done: "todo",
-                  };
-                  handleStatusChange(
-                    task.id,
-                    nextStatus[task.status || "todo"],
-                  );
-                }}
-                className={clsx(
-                  "w-5 h-5 rounded-full border flex items-center justify-center transition-colors",
-                  {
-                    "border-gray-300 hover:border-blue-500":
-                      task.status === "todo",
-                    "border-blue-500 bg-blue-500 text-white":
-                      task.status === "in_progress",
-                    "border-green-500 bg-green-500 text-white":
-                      task.status === "done",
-                  },
-                )}
-                title={`Current status: ${task.status}. Click to advance.`}
-              >
-                {task.status === "done" && (
-                  <svg
-                    className="w-3 h-3"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={3}
-                      d="M5 13l4 4L19 7"
-                    />
-                  </svg>
-                )}
-                {task.status === "in_progress" && (
-                  <div className="w-2 h-2 bg-white rounded-full animate-pulse" />
-                )}
-              </button>
-              <div>
-                <h4
-                  className={clsx("font-medium text-gray-900", {
-                    "line-through text-gray-400": task.status === "done",
-                  })}
+            <CardContent className="p-4 flex items-center justify-between">
+              <div className="flex items-center gap-4">
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className={cn(
+                    "h-8 w-8 rounded-full",
+                    task.status === "done"
+                      ? "text-green-500 hover:text-green-600"
+                      : "text-muted-foreground",
+                  )}
+                  onClick={() => {
+                    const nextStatus: Record<string, TaskStatus> = {
+                      todo: "in_progress",
+                      in_progress: "done",
+                      done: "todo",
+                    };
+                    handleStatusChange(
+                      task.id,
+                      nextStatus[task.status || "todo"],
+                    );
+                  }}
                 >
-                  {task.title}
-                </h4>
-                {task.description && (
-                  <p className="text-sm text-gray-500 line-clamp-1">
-                    {task.description}
-                  </p>
-                )}
-              </div>
-            </div>
-            <div className="flex items-center gap-3">
-              <span
-                className={clsx(
-                  "text-xs px-2 py-1 rounded-full font-medium capitalize",
-                  {
-                    "bg-gray-100 text-gray-600": task.priority === "low",
-                    "bg-yellow-50 text-yellow-700": task.priority === "medium",
-                    "bg-red-50 text-red-700": task.priority === "high",
-                  },
-                )}
-              >
-                {task.priority}
-              </span>
-              <span className="text-xs text-gray-400">
-                {task.dueDate
-                  ? new Date(task.dueDate).toLocaleDateString()
-                  : ""}
-              </span>
-              <button
-                onClick={() => setEditingTaskId(task.id)}
-                className="text-gray-400 hover:text-blue-600 p-1"
-              >
-                <svg
-                  className="w-4 h-4"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"
-                  />
-                </svg>
-              </button>
-            </div>
-          </div>
-        ))}
+                  {task.status === "done" ? (
+                    <CheckCircle2 className="h-5 w-5" />
+                  ) : task.status === "in_progress" ? (
+                    <Clock className="h-5 w-5" />
+                  ) : (
+                    <Circle className="h-5 w-5" />
+                  )}
+                </Button>
 
+                <div className="space-y-1">
+                  <h3
+                    className={cn(
+                      "font-medium leading-none",
+                      task.status === "done" &&
+                        "text-muted-foreground line-through",
+                    )}
+                  >
+                    {task.title}
+                  </h3>
+                  <div className="flex items-center gap-2">
+                    <Badge
+                      variant="outline"
+                      className={cn(
+                        "text-[10px] uppercase tracking-wider px-1.5 py-0",
+                        priorityConfig[task.priority as TaskPriority].color,
+                      )}
+                    >
+                      {task.priority}
+                    </Badge>
+                    {task.description && (
+                      <p className="text-xs text-muted-foreground line-clamp-1">
+                        {task.description}
+                      </p>
+                    )}
+                  </div>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-2">
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="ghost" size="icon" className="h-8 w-8">
+                      <MoreVertical className="h-4 w-4" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end">
+                    <DropdownMenuItem onClick={() => setEditingTaskId(task.id)}>
+                      <Pencil className="mr-2 h-4 w-4" /> Edit Task
+                    </DropdownMenuItem>
+                    <DropdownMenuItem
+                      className="text-destructive focus:text-destructive"
+                      onClick={() => {
+                        if (
+                          confirm("Are you sure you want to delete this task?")
+                        ) {
+                          // TODO: Implement delete mutation
+                        }
+                      }}
+                    >
+                      Delete Task
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </div>
+            </CardContent>
+          </Card>
+        ))}
         {tasks?.length === 0 && (
-          <div className="text-center py-8 bg-gray-50 rounded-lg border border-dashed border-gray-300">
-            <p className="text-gray-500">
+          <div className="text-center py-12 bg-muted/30 rounded-lg border-2 border-dashed">
+            <p className="text-muted-foreground">
               No tasks found matching your filters.
             </p>
           </div>
         )}
       </div>
 
-      {editingTaskId && (
-        <EditTaskModal
-          isOpen={true}
-          onClose={() => setEditingTaskId(null)}
-          taskId={editingTaskId}
-        />
-      )}
+      <EditTaskModal
+        isOpen={editingTaskId !== null}
+        onClose={() => setEditingTaskId(null)}
+        taskId={editingTaskId || 0}
+      />
     </div>
   );
 }

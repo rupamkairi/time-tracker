@@ -1,8 +1,14 @@
 import { trpc } from "../../utils/trpc";
-import { Modal } from "../ui/Modal";
 import { LogForm } from "./LogForm";
 import type { LogFormData } from "./LogForm";
 import { toast } from "sonner";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from "@/components/ui/dialog";
 
 interface EditLogModalProps {
   isOpen: boolean;
@@ -12,22 +18,22 @@ interface EditLogModalProps {
 
 export function EditLogModal({ isOpen, onClose, logId }: EditLogModalProps) {
   const utils = trpc.useUtils();
-  
+
   const { data: log, isLoading: isLoadingLog } = trpc.taskLog.getById.useQuery(
-      { id: logId }, 
-      { enabled: isOpen && !!logId }
+    { id: logId },
+    { enabled: isOpen && !!logId },
   );
-  
+
   const updateLog = trpc.taskLog.update.useMutation({
     onSuccess: () => {
-      toast.success('Log updated successfully');
+      toast.success("Log updated successfully");
       utils.calendar.getRange.invalidate();
       utils.taskLog.getById.invalidate({ id: logId });
       onClose();
     },
     onError: (error) => {
       toast.error(`Failed to update log: ${error.message}`);
-    }
+    },
   });
 
   const handleSubmit = (data: LogFormData) => {
@@ -35,35 +41,43 @@ export function EditLogModal({ isOpen, onClose, logId }: EditLogModalProps) {
       id: logId,
       ...data,
       taskId: data.taskId ? Number(data.taskId) : undefined,
-      links: data.links
+      links: data.links,
     });
   };
 
-  if (isLoadingLog) return null;
-
   // Flatten links from details for the form
-  const flattenedLinks = log?.details?.flatMap(d => d.links || []) || [];
+  const flattenedLinks = log?.details?.flatMap((d) => d.links || []) || [];
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} title="Edit Log">
-      {log ? (
-          <LogForm 
+    <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
+      <DialogContent className="sm:max-w-[500px] max-h-[90vh] overflow-y-auto">
+        <DialogHeader>
+          <DialogTitle>Edit Log</DialogTitle>
+          <DialogDescription>Update your time log details.</DialogDescription>
+        </DialogHeader>
+        {isLoadingLog ? (
+          <div className="py-10 text-center">Loading log...</div>
+        ) : log ? (
+          <LogForm
             defaultValues={{
-                title: log.title,
-                description: log.description || '',
-                taskId: log.taskId || undefined,
-                startTime: log.startTime || undefined,
-                endTime: log.endTime || undefined,
-                logDate: log.logDate || undefined,
-                links: flattenedLinks
+              title: log.title,
+              description: log.description || "",
+              taskId: log.taskId || undefined,
+              startTime: log.startTime || undefined,
+              endTime: log.endTime || undefined,
+              logDate: log.logDate || undefined,
+              links: flattenedLinks,
             }}
-            onSubmit={handleSubmit} 
+            onSubmit={handleSubmit}
             onCancel={onClose}
             isLoading={updateLog.isPending}
           />
-      ) : (
-          <div>Log not found</div>
-      )}
-    </Modal>
+        ) : (
+          <div className="py-10 text-center text-destructive font-medium">
+            Log not found
+          </div>
+        )}
+      </DialogContent>
+    </Dialog>
   );
 }

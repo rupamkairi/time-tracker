@@ -1,35 +1,48 @@
 import { Outlet, NavLink } from "react-router-dom";
-import clsx from "clsx";
-import { Toaster } from "sonner";
+import { Toaster } from "@/components/ui/sonner";
+import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
 
 export function AppLayout() {
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col">
+    <div className="min-h-screen bg-background flex flex-col">
       <Toaster position="top-right" richColors />
-      <header className="bg-white border-b border-gray-200 sticky top-0 z-10">
+      <header className="bg-card border-b sticky top-0 z-50">
         <div className="container mx-auto px-4 h-16 flex items-center justify-between">
           <div className="flex items-center gap-8">
-            <NavLink to="/" className="text-xl font-bold text-gray-900">
+            <NavLink to="/" className="text-xl font-bold text-foreground">
               TimeTracker
             </NavLink>
-            <nav className="flex items-center gap-1">
-              <NavLink 
-                to="/projects" 
-                className={({ isActive }) => clsx(
-                  "px-3 py-2 rounded-md text-sm font-medium transition-colors",
-                  isActive ? "bg-gray-100 text-gray-900" : "text-gray-600 hover:text-gray-900 hover:bg-gray-50"
+            <nav className="flex items-center gap-2">
+              <NavLink to="/projects">
+                {({ isActive }) => (
+                  <Button
+                    variant={isActive ? "secondary" : "ghost"}
+                    className={cn(
+                      "font-medium transition-colors",
+                      !isActive &&
+                        "text-muted-foreground hover:text-foreground",
+                    )}
+                    asChild
+                  >
+                    <span>Projects</span>
+                  </Button>
                 )}
-              >
-                Projects
               </NavLink>
-              <NavLink 
-                to="/calendar" 
-                className={({ isActive }) => clsx(
-                  "px-3 py-2 rounded-md text-sm font-medium transition-colors",
-                  isActive ? "bg-gray-100 text-gray-900" : "text-gray-600 hover:text-gray-900 hover:bg-gray-50"
+              <NavLink to="/calendar">
+                {({ isActive }) => (
+                  <Button
+                    variant={isActive ? "secondary" : "ghost"}
+                    className={cn(
+                      "font-medium transition-colors",
+                      !isActive &&
+                        "text-muted-foreground hover:text-foreground",
+                    )}
+                    asChild
+                  >
+                    <span>Calendar</span>
+                  </Button>
                 )}
-              >
-                Calendar
               </NavLink>
             </nav>
           </div>
